@@ -85,13 +85,15 @@ module.exports = {
      * Set acess token.
      *
      * @param dexter
-     * @param spotifyApi
      */
-    authParams: function (dexter, spotifyApi) {
+    authParams: function (dexter) {
 
-        if (dexter.environment('spotify_access_token')) {
+        if (dexter.environment('instagram_access_token')) {
 
-            spotifyApi.setAccessToken(dexter.environment('spotify_access_token'));
+            ig.use({access_token: dexter.environment('instagram_access_token')});
+        } else {
+
+            this.fail('A [instagram_access_token] environment is Required.');
         }
     },
 
@@ -116,7 +118,7 @@ module.exports = {
 
         var userId = step.input('userId').first() || 'self';
 
-        ig.use({ access_token: dexter.environment('instagram_access_token') });
+        this.authParams(dexter);
 
         ig.user_follows(userId, function (err, result) {
 
