@@ -12,8 +12,20 @@
     //Required. Outputs the module emits.
     "outputs": [
         {
-            "id": "users",
-            "title":"Array of users"
+            "id": "id",
+            "title": "User ID"
+        },
+        {
+            "id": "full_name",
+            "title":"Full Name"
+        },
+        {
+            "id": "profile_picture",
+            "title":"Picture"
+        },
+        {
+            "id": "username",
+            "title":"Username"
         }
     ],
     "title": "Instagram Get User Follows" /* Required.A display name for the module */
