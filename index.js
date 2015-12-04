@@ -1,17 +1,22 @@
 var _ = require('lodash');
 var ig = require('instagram-node').instagram();
 
+//var globalPickResult = {
+//    users: {
+//        key: 'users',
+//        fields: {
+//            id: 'id',
+//            full_name: 'full_name',
+//            profile_picture: 'profile_picture',
+//            username: 'username'
+//        }
+//    }
+//};
+
 var globalPickResult = {
-    users: {
-        key: 'users',
-        fields: {
-            id: 'id',
-            full_name: 'full_name',
-            profile_picture: 'profile_picture',
-            username: 'username'
-        }
-    }
+    users: ['id', 'username']
 };
+
 
 module.exports = {
 
@@ -88,17 +93,19 @@ module.exports = {
 
         var userId = step.input('userId').first() || 'self';
 
-        ig.use({ access_token: dexter.environment('instagram_access_token') });
+        this.pickResult({users: {'id': 'id', test: 'test'}}, globalPickResult);
 
-        ig.user_follows(userId, function (err, result) {
-
-            if (err) {
-
-                this.fail(err);
-            } else {
-
-                this.complete(this.pickResult({users: result}, globalPickResult));
-            }
-        }.bind(this));
+        //ig.use({ access_token: dexter.environment('instagram_access_token') });
+        //
+        //ig.user_follows(userId, function (err, result) {
+        //
+        //    if (err) {
+        //
+        //        this.fail(err);
+        //    } else {
+        //
+        //        this.complete(this.pickResult({users: result}, globalPickResult));
+        //    }
+        //}.bind(this));
     }
 };
