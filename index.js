@@ -52,6 +52,14 @@ module.exports = {
         return result;
     },
 
+    /**
+     * System func for pickResult.
+     *
+     * @param mapValue
+     * @param templateObject
+     * @returns {*}
+     * @private
+     */
     _mapPickArrays: function (mapValue, templateObject) {
 
         var arrayResult = [],
