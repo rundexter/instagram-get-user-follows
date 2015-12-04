@@ -1,22 +1,16 @@
 var _ = require('lodash');
 var ig = require('instagram-node').instagram();
 
-//var globalPickResult = {
-//    users: {
-//        key: 'users',
-//        fields: {
-//            id: 'id',
-//            full_name: 'full_name',
-//            profile_picture: 'profile_picture',
-//            username: 'username'
-//        }
-//    }
-//};
-
 var globalPickResult = {
-    users: ['id', 'username']
+    users: {
+        fields: {
+            'id': 'id',
+            'full_name': 'full_name',
+            'profile_picture': 'profile_picture',
+            'username': 'username'
+        }
+    }
 };
-
 
 module.exports = {
 
@@ -24,36 +18,57 @@ module.exports = {
      * Return pick result.
      *
      * @param output
-     * @param pickResult
+     * @param pickTemplate
      * @returns {*}
      */
-    pickResult: function (output, pickResult) {
+    pickResult: function (output, pickTemplate) {
         var result = {};
+        // map template keys
+        _.map(_.keys(pickTemplate), function (templateKey) {
 
-        _.map(_.keys(pickResult), function (resultVal) {
+            var oneTemplateObject = pickTemplate[templateKey];
+            var outputKeyValue = _.get(output, templateKey);
 
-            if (_.has(output, resultVal)) {
+            if (!outputKeyValue) {
 
-                if (_.isObject(pickResult[resultVal])) {
-                    if (_.isArray(_.get(output, resultVal))) {
+                return result;
+            }
+            // if template key is object - transform, else just save
+            if (_.isObject(oneTemplateObject)) {
+                // if data is array - map and transform, else once transform
+                if (_.isArray(outputKeyValue)) {
 
-                        if (!_.isArray(result[pickResult[resultVal].key])) {
-                            result[pickResult[resultVal].key] = [];
-                        }
-
-                        _.map(_.get(output, resultVal), function (inOutArrayValue) {
-
-                            result[pickResult[resultVal].key].push(this.pickResult(inOutArrayValue, pickResult[resultVal].fields));
-                        }, this);
-                    } else if (_.isObject(_.get(output, resultVal))){
-
-                        result[pickResult[resultVal].key] = this.pickResult(_.get(output, resultVal), pickResult[resultVal].fields);
-                    }
+                    result = this._mapPickArrays(outputKeyValue, oneTemplateObject);
                 } else {
-                    _.set(result, pickResult[resultVal], _.get(output, resultVal));
+
+                    result[oneTemplateObject.key] = this.pickResult(outputKeyValue, oneTemplateObject.fields);
                 }
+            } else {
+
+                _.set(result, oneTemplateObject, outputKeyValue);
             }
         }, this);
+
+        return result;
+    },
+
+    _mapPickArrays: function (mapValue, templateObject) {
+
+        var arrayResult = [],
+            result = templateObject.key? {} : [];
+
+        _.map(mapValue, function (inOutArrayValue) {
+
+            arrayResult.push(this.pickResult(inOutArrayValue, templateObject.fields));
+        }, this);
+
+        if (templateObject.key) {
+
+            result[templateObject.key] = arrayResult;
+        } else {
+
+            result = arrayResult;
+        }
 
         return result;
     },
@@ -93,19 +108,17 @@ module.exports = {
 
         var userId = step.input('userId').first() || 'self';
 
-        this.pickResult({users: {'id': 'id', test: 'test'}}, globalPickResult);
+        ig.use({ access_token: dexter.environment('instagram_access_token') });
 
-        //ig.use({ access_token: dexter.environment('instagram_access_token') });
-        //
-        //ig.user_follows(userId, function (err, result) {
-        //
-        //    if (err) {
-        //
-        //        this.fail(err);
-        //    } else {
-        //
-        //        this.complete(this.pickResult({users: result}, globalPickResult));
-        //    }
-        //}.bind(this));
+        ig.user_follows(userId, function (err, result) {
+
+            if (err) {
+
+                this.fail(err);
+            } else {
+
+                this.complete(this.pickResult({users: result}, globalPickResult));
+            }
+        }.bind(this));
     }
 };
