@@ -28,6 +28,10 @@
             "title":"Username"
         }
     ],
+    "providers": [{
+        "name": "instagram",
+        "scopes": [ "basic", "public_content" ]
+    }],
     "icon": "instagram",
     "title": "Instagram Get User Follows" /* Required.A display name for the module */
 }
